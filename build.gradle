@@ -1,0 +1,78 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:5.0.0"
+        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
+        classpath 'org.kordamp.gradle:stats-gradle-plugin:0.2.0'
+    }
+}
+
+plugins {
+    id 'java-library'
+    id 'groovy'
+    id 'application'
+}
+
+group 'dinnMigration'
+version '0.0.1-SNAPSHOT'
+
+
+
+repositories {
+    jcenter()
+    maven {
+        url 'https://repo.spring.io/libs-snapshot'
+    }
+}
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+dependencies {
+
+
+
+    implementation "org.codehaus.groovy:groovy-all:2.4.15"
+    implementation group: 'com.opencsv', name: 'opencsv', version: '3.7'
+
+
+
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+
+    testImplementation 'org.codehaus.groovy:groovy-all:2.5.6'
+    testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
+    testImplementation('org.junit.jupiter:junit-jupiter:5.5.2')
+    testImplementation 'net.bytebuddy:byte-buddy:1.9.12'
+
+    api group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.6.1'
+    api group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.6.1'
+
+
+    api 'log4j:log4j:1.2.16'
+
+    testCompile "org.spockframework:spock-core:1.1-groovy-2.4"
+
+
+    compile 'org.jsoup:jsoup:1.13.1'
+    implementation 'junit:junit:4.12'
+
+
+}
+
+application {
+    mainClassName = "com.mx.finerio.ApplicationMain"
+}
+
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'com.mx.finerio.ApplicationMain'
+        )
+    }
+}
