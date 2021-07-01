@@ -3,7 +3,7 @@ package com.mx.finerio.services
 import com.mx.finerio.dto.CsvRow
 import com.opencsv.CSVReader
 
-class ReadFile {
+class ReadFileService {
 
     List<CsvRow> processInputFileOneByOne(String inputFilePath) throws Exception{
         List<CsvRow> rows = []
@@ -26,7 +26,7 @@ class ReadFile {
 
     }
 
-    List processInputFile(String inputFilePath) throws Exception{
+    List<CsvRow> processInputFile(String inputFilePath) throws Exception{
 
         List<CsvRow> rows = []
         try  {
