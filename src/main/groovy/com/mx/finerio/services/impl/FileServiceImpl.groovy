@@ -8,4 +8,9 @@ class FileServiceImpl implements  FileService{
     void createFileRecord(StatusDto statusDto) {
 
     }
+
+    @Override
+    void createResume() {
+
+    }
 }

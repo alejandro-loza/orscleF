@@ -1,9 +1,9 @@
 package com.mx.finerio
 
-import com.mx.finerio.services.ReadFile
+import com.mx.finerio.services.ReadFileService
 import spock.lang.Specification
 
-class ReadFileSpec extends Specification{
+class ReadFileServiceSpec extends Specification{
 
 
     public static final String TEST_FILE = '/home/pinky/Proyectos/finerio/oracleDinnCharge/src/test/resources/test.csv'
@@ -21,7 +21,7 @@ class ReadFileSpec extends Specification{
 
     def "Should read a csv file all at once"(){
         given:
-        ReadFile reader = new ReadFile()
+        ReadFileService reader = new ReadFileService()
 
         when:
         def response =reader.processInputFile(DINN_CSV_FILE)
@@ -33,7 +33,7 @@ class ReadFileSpec extends Specification{
 
     def "Should read a csv file one by one"(){
         given:
-        ReadFile reader = new ReadFile()
+        ReadFileService reader = new ReadFileService()
 
         when:
         def response =reader.processInputFileOneByOne(DINN_CSV_FILE)
