@@ -37,8 +37,46 @@ class PfmTask implements  Runnable {
         fileService.createFileRecord(statusDto, FILES_PATH)
     }
 
-    private StatusDto fromPfmResponseToFileRecord(UserDto userDto, AccountDto accountDto){
-        return null
+    private StatusDto fromPfmResponseToFileRecord( UserDto userDto, AccountDto accountDto, String customerNumber ){
+
+        def statusDto = new StatusDto()
+        statusDto.customerNumber = customerNumber
+        def user
+        def account
+
+        if( userDto.isSucces ) {
+            user = [ success:true,
+                     id:userDto.id,
+                     dateCreated:userDto.dateCreated,
+                     name:userDto.name ]
+            if( accountDto.isSucces ) {
+                account = [ success: true,
+                            id: accountDto.id,
+                            dateCreated: accountDto.dateCreated,
+                            lastUpdate:accountDto.lastUpdated,
+                            nature: accountDto.nature,
+                            name: accountDto.number,
+                            balance:accountDto.balance,
+                            chargeable: accountDto.chargeable]
+                return [ success: true, user: user, account: account ]
+            }else{
+                def accountError = [ success: false,
+                                     statusCode: accountDto.statusCode,
+                                     errorMessage:accountDto.errorMessage ,
+                                     errorDetail: accountDto.errorDetail  ]
+                return [ success: false, user: user, account: accountError  ]
+            }
+        }else{
+            return [ success: false, user: [ success: false,
+                                             statusCode: userDto.statusCode,
+                                             errorMessage:userDto.errorMessage ,
+                                             errorDetail: userDto.errorDetail  ],
+                     account: null  ]
+        }
+    }
+
+    private String fromMapToJsonString( Map data ){
+        def json = JsonOutput.toJson(data)
     }
 
     private UserCreateDto generateUserCreateBodyDto(CsvRow csvRow){
