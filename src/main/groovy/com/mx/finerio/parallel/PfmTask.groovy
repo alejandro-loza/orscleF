@@ -8,6 +8,7 @@ import com.mx.finerio.dto.UserCreateDto
 import com.mx.finerio.dto.UserDto
 import com.mx.finerio.services.FileService
 import com.mx.finerio.services.PFMService
+import groovy.json.JsonOutput
 
 class PfmTask implements  Runnable {
 
@@ -39,10 +40,9 @@ class PfmTask implements  Runnable {
 
     private StatusDto fromPfmResponseToFileRecord( UserDto userDto, AccountDto accountDto, String customerNumber ){
 
-        def statusDto = new StatusDto()
-        statusDto.customerNumber = customerNumber
         def user
         def account
+        def resMap
 
         if( userDto.isSucces ) {
             user = [ success:true,
@@ -58,25 +58,25 @@ class PfmTask implements  Runnable {
                             name: accountDto.number,
                             balance:accountDto.balance,
                             chargeable: accountDto.chargeable]
-                return [ success: true, user: user, account: account ]
+                resMap = [ success: true, user: user, account: account ]
             }else{
                 def accountError = [ success: false,
                                      statusCode: accountDto.statusCode,
                                      errorMessage:accountDto.errorMessage ,
                                      errorDetail: accountDto.errorDetail  ]
-                return [ success: false, user: user, account: accountError  ]
+                resMap = [ success: false, user: user, account: accountError  ]
             }
         }else{
-            return [ success: false, user: [ success: false,
+                resMap = [ success: false, user: [ success: false,
                                              statusCode: userDto.statusCode,
                                              errorMessage:userDto.errorMessage ,
                                              errorDetail: userDto.errorDetail  ],
                      account: null  ]
         }
-    }
 
-    private String fromMapToJsonString( Map data ){
-        def json = JsonOutput.toJson(data)
+        def statusDto = new StatusDto()
+        statusDto.customerNumber = customerNumber
+        statusDto.data = JsonOutput.toJson(data)
     }
 
     private UserCreateDto generateUserCreateBodyDto(CsvRow csvRow){
