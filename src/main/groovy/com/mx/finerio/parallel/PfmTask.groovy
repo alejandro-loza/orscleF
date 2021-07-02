@@ -9,7 +9,9 @@ import com.mx.finerio.dto.UserDto
 import com.mx.finerio.services.FileService
 import com.mx.finerio.services.PFMService
 
-class PfmTask implements  Runnable{
+class PfmTask implements  Runnable {
+
+    public static final String FILES_PATH = "files"
 
     PFMService pfmService
     FileService fileService
@@ -28,11 +30,11 @@ class PfmTask implements  Runnable{
 
     @Override
     void run() {
-        UserDto userCreateResponse = pfmService.createUser(generateUserCreateBodyDto(csvRow))
+        UserDto userCreateResponse = pfmService.createUser(generateUserCreateBodyDto(csvRow))//todo si falla?
         AccountDto accountCreateResponse = pfmService.createAccount(
                 generateAccountCreateBodyDto(csvRow, userCreateResponse))
-        def statusDto = fromPfmResponseToFileRecord(userCreateResponse,accountCreateResponse)
-        fileService.createFileRecord(statusDto)
+        StatusDto statusDto = fromPfmResponseToFileRecord(userCreateResponse,accountCreateResponse)
+        fileService.createFileRecord(statusDto, FILES_PATH)
     }
 
     private StatusDto fromPfmResponseToFileRecord(UserDto userDto, AccountDto accountDto){
