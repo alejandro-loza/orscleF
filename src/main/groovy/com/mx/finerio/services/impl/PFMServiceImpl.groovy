@@ -74,6 +74,7 @@ class PFMServiceImpl implements  PFMService{
                 userDto.statusCode = e.response.statusCode
                 userDto.errorMessage = bodyResponse['description']
                 userDto.errorDetail = bodyResponse['detail']
+            return userDto
         }
 
         bodyResponse = new JsonSlurper().parseText( new String( response.data, UTF_8) )
@@ -112,6 +113,7 @@ class PFMServiceImpl implements  PFMService{
             accountDto.statusCode = e.response.statusCode
             accountDto.errorMessage = bodyResponse['description']
             accountDto.errorDetail = bodyResponse['detail']
+            return accountDto
         }
 
         bodyResponse = new JsonSlurper().parseText( new String( response.data, UTF_8) )

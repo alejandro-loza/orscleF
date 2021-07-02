@@ -5,6 +5,7 @@ import com.mx.finerio.dto.ArgumentsDto
 import com.mx.finerio.dto.CsvRow
 import com.mx.finerio.dto.StatusDto
 import com.mx.finerio.dto.UserDto
+import com.mx.finerio.parallel.PfmTask
 import com.mx.finerio.services.FileService
 import com.mx.finerio.services.PFMService
 import com.mx.finerio.services.ReadFileService
@@ -13,6 +14,10 @@ import com.mx.finerio.services.ValidatorService
 import com.mx.finerio.services.impl.FileServiceImpl
 import com.mx.finerio.services.impl.PFMServiceImpl
 import com.mx.finerio.services.impl.ValidatorServiceImpl
+
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 class Orchestrator {
 
@@ -28,39 +33,34 @@ class Orchestrator {
          if ( !validatorService.areRecordsUniqueValid( listCsv )) {
              return
          }
+       ThreadPoolExecutor executor =
+               (ThreadPoolExecutor) Executors.newFixedThreadPool( arguments.threads as Integer )
 
        listCsv.each {
+           def data = [   pfmService: pfmService,
+                          fileService: fileService,
+                          csvRow: it,
+                          host: arguments.host,
+                          incomeToken: arguments.incomeToken
 
-           if( !validatorService.hasBeenProcessed(it) ){
-               def userCreateDto= getUserDto(it)
-               def accountCreateDto=getAccountDto(it)
-               def userDto = pfmService.createUser(userCreateDto)
-               def accountDto = pfmService.createAccount(accountCreateDto)
-               def statusDto = fromPfmResponseToFileRecord(userDto,accountDto)
-               fileService.createFileRecord(statusDto)
-           }
-
+           ]
+           def task = new PfmTask( data )
+           executor.execute(task)
        }
+       executor.shutdown()
+       executor.awaitTermination(arguments.awaitTerminationMinutes as Long, TimeUnit.MINUTES)
        fileService.createResume()
-
    }
-
-    private StatusDto fromPfmResponseToFileRecord(UserDto userDto, AccountDto accountDto){
-        return null
-    }
-
-    private UserDto getUserDto(CsvRow csvRow){
-        return null
-    }
-    private AccountDto getAccountDto(CsvRow csvRow){
-        return null
-    }
 
     private static ArgumentsDto buildArguments(String[] args) {
         ArgumentsDto arguments = new ArgumentsDto()
         if (args.size() > 0) {
             arguments.with {
                 filePath = args.first()
+                host = args[ 1 ]
+                incomeToken = args[ 2 ]
+                threads = args[ 3 ]
+                awaitTerminationMinutes = args[ 4 ]
             }
         }
         arguments

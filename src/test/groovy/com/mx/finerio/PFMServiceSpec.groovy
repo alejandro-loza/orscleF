@@ -24,7 +24,7 @@ class PFMServiceSpec extends Specification{
     def "Should create user"(){
         given:
         def userCreateDto = new UserCreateDto()
-        def name='145156159'
+        def name='145156163'
         userCreateDto.name=name
 
 
@@ -35,10 +35,23 @@ class PFMServiceSpec extends Specification{
         assert response.name == name
     }
 
+    def "Should return an error when creating user"(){
+        given:
+        def userCreateDto = new UserCreateDto()
+        def name='145156163'
+        userCreateDto.name=name
+
+        when:
+        def response = pFMService.createUser( userCreateDto )
+        then:
+        assert response.isSucces == false
+        assert response.name == null
+    }
+
     def "Should create account"(){
         given:
         def accountCreateDto = new AccountCreateDto()
-        Long userIdd=371746
+        Long userIdd=371747
         Long financialEntityIdd=1
         String naturee='Debit'
         String namee='Account'
@@ -59,6 +72,32 @@ class PFMServiceSpec extends Specification{
         then:
         assert response.isSucces == true
         assert response.name == namee
+    }
+
+    def "Should return an error when creating account"(){
+        given:
+        def accountCreateDto = new AccountCreateDto()
+        Long userIdd=371747
+        Long financialEntityIdd=1
+        String naturee='Debitt'
+        String namee='Account'
+        String numberr="sdfdsfsd"
+        BigDecimal balancee = BigDecimal.ZERO
+
+        accountCreateDto.with {
+            userId=userIdd
+            financialEntityId=financialEntityIdd
+            nature=naturee
+            name=namee
+            number=numberr
+            balance=balancee
+        }
+
+        when:
+        def response = pFMService.createAccount( accountCreateDto )
+        then:
+        assert response.isSucces == false
+        assert response.name == null
     }
 
 
