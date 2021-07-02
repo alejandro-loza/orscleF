@@ -1,11 +1,13 @@
 package com.mx.finerio
 
 import com.mx.finerio.services.ReadFileService
+import com.mx.finerio.services.impl.ReadFileServiceImpl
 import spock.lang.Specification
 
 class ReadFileServiceSpec extends Specification{
 
 
+    //todo change to relative ones
     public static final String TEST_FILE = '/home/pinky/Proyectos/finerio/oracleDinnCharge/src/test/resources/test.csv'
     public static final String DINN_CSV_FILE = '/home/pinky/Proyectos/finerio/oracleDinnCharge/src/test/resources/dinnDb.csv'
 
@@ -21,7 +23,8 @@ class ReadFileServiceSpec extends Specification{
 
     def "Should read a csv file all at once"(){
         given:
-        ReadFileService reader = new ReadFileService()
+
+        ReadFileService reader = new ReadFileServiceImpl()
 
         when:
         def response =reader.processInputFile(DINN_CSV_FILE)
@@ -33,7 +36,8 @@ class ReadFileServiceSpec extends Specification{
 
     def "Should read a csv file one by one"(){
         given:
-        ReadFileService reader = new ReadFileService()
+
+        ReadFileService reader = new ReadFileServiceImpl()
 
         when:
         def response =reader.processInputFileOneByOne(DINN_CSV_FILE)
@@ -51,7 +55,7 @@ class ReadFileServiceSpec extends Specification{
         assert group["ABELARDO SANCHEZ ORTA"].size() == 3044
 
         def group2 = response.groupBy {
-            it.accountNumber
+            it.customerNumber
         }
         assert group2.size() == 4818
     }
