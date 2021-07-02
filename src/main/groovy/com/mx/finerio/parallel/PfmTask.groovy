@@ -1,8 +1,10 @@
 package com.mx.finerio.parallel
 
+import com.mx.finerio.dto.AccountCreateDto
 import com.mx.finerio.dto.AccountDto
 import com.mx.finerio.dto.CsvRow
 import com.mx.finerio.dto.StatusDto
+import com.mx.finerio.dto.UserCreateDto
 import com.mx.finerio.dto.UserDto
 import com.mx.finerio.services.FileService
 import com.mx.finerio.services.PFMService
@@ -26,11 +28,10 @@ class PfmTask implements  Runnable{
 
     @Override
     void run() {
-        def userCreateDto = getUserDto(csvRow)
-        def accountCreateDto = getAccountDto(csvRow)
-        def userDto = pfmService.createUser(userCreateDto)
-        def accountDto = pfmService.createAccount(accountCreateDto)
-        def statusDto = fromPfmResponseToFileRecord(userDto,accountDto)
+        UserDto userCreateResponse = pfmService.createUser(generateUserCreateBodyDto(csvRow))
+        AccountDto accountCreateResponse = pfmService.createAccount(
+                generateAccountCreateBodyDto(csvRow, userCreateResponse))
+        def statusDto = fromPfmResponseToFileRecord(userCreateResponse,accountCreateResponse)
         fileService.createFileRecord(statusDto)
     }
 
@@ -38,10 +39,20 @@ class PfmTask implements  Runnable{
         return null
     }
 
-    private UserDto getUserDto(CsvRow csvRow){
-        return null
+    private UserCreateDto generateUserCreateBodyDto(CsvRow csvRow){
+        new UserCreateDto(csvRow.customerNumber.toString())
     }
-    private AccountDto getAccountDto(CsvRow csvRow){
-        return null
+
+    private AccountCreateDto generateAccountCreateBodyDto(CsvRow csvRow, UserDto userResponse){
+        AccountCreateDto cmd = new AccountCreateDto()
+        cmd.with {
+            userId = userResponse.id
+            financialEntityId = csvRow.financialEntityId
+            nature = csvRow.accountNature
+            name = csvRow.accountName
+            number = csvRow.customerNumber
+            balance = csvRow.balance
+        }
+        cmd
     }
 }
