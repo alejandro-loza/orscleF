@@ -1,6 +1,6 @@
 package com.mx.finerio.dto
 
-class AccountDto extends PfmStatusDto {
+class AccountResponseDto extends PfmStatusDto {
     String id
     String dateCreated
     String lastUpdated

@@ -48,12 +48,12 @@ class ReadFileServiceImpl implements ReadFileService {
     private CsvRow  createCsvRow(String[] plainRowList) {
         CsvRow row = new CsvRow()
         row.with {
-            userName = plainRowList[0]
-            financialEntityId = plainRowList[1] as Long
+            customerName = plainRowList[0]
+            accountFinancialEntityId = plainRowList[1] as Long
             accountName = plainRowList[2]
-            customerNumber = plainRowList[3] as Long
+            accountNumber = plainRowList[3] as Long
             accountNature = plainRowList[4]
-            balance = plainRowList[5] as BigDecimal
+            accountBalance = plainRowList[5] as BigDecimal
         }
         row
     }

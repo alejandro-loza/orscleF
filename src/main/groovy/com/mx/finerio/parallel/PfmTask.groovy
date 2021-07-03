@@ -1,11 +1,11 @@
 package com.mx.finerio.parallel
 
 import com.mx.finerio.dto.AccountCreateDto
-import com.mx.finerio.dto.AccountDto
+import com.mx.finerio.dto.AccountResponseDto
 import com.mx.finerio.dto.CsvRow
 import com.mx.finerio.dto.StatusDto
 import com.mx.finerio.dto.UserCreateDto
-import com.mx.finerio.dto.UserDto
+import com.mx.finerio.dto.UserResponseDto
 import com.mx.finerio.services.FileService
 import com.mx.finerio.services.PFMService
 import groovy.json.JsonOutput
@@ -20,6 +20,7 @@ class PfmTask implements  Runnable {
     String host
     String incomeToken
     Map data
+    String seedFileName
 
     PfmTask(  Map data ) {
         this.pfmService= data.pfmService
@@ -27,24 +28,26 @@ class PfmTask implements  Runnable {
         this.csvRow= data.csvRow
         this.host = data.host
         this.incomeToken = data.incomeToken
+        this.seedFileName = data.seedFileName
     }
 
     @Override
     void run() {
-        UserDto userCreateResponse = pfmService.createUser(generateUserCreateBodyDto(csvRow))//todo si falla?
-        AccountDto accountCreateResponse = pfmService.createAccount(
+        UserResponseDto userCreateResponse = pfmService.createUser(generateUserCreateBodyDto(csvRow))
+        AccountResponseDto accountCreateResponse = pfmService.createAccount(
                 generateAccountCreateBodyDto(csvRow, userCreateResponse))
-        StatusDto statusDto = fromPfmResponseToFileRecord(userCreateResponse,accountCreateResponse)
+        StatusDto statusDto = fromPfmResponseToFileRecord(
+                userCreateResponse,accountCreateResponse, csvRow.accountNumber.toString())
         fileService.createFileRecord(statusDto, FILES_PATH)
     }
 
-    private StatusDto fromPfmResponseToFileRecord( UserDto userDto, AccountDto accountDto, String customerNumber ){
+    private StatusDto fromPfmResponseToFileRecord( UserResponseDto userDto, AccountResponseDto accountDto, String customerNumber ){
 
         def user
         def account
         def resMap
 
-        if( userDto.isSucces ) {
+        if( userDto.isSucces ) { //todo if account fails why not all row fails? if( userDto.isSucces && accountDto.isSucces )
             user = [ success:true,
                      id:userDto.id,
                      dateCreated:userDto.dateCreated,
@@ -58,7 +61,7 @@ class PfmTask implements  Runnable {
                             name: accountDto.number,
                             balance:accountDto.balance,
                             chargeable: accountDto.chargeable]
-                resMap = [ success: true, user: user, account: account ]
+                resMap = [ success: true, user: user, account: account ] //todo migrate to DTOS to use on resumen csv
             }else{
                 def accountError = [ success: false,
                                      statusCode: accountDto.statusCode,
@@ -74,24 +77,25 @@ class PfmTask implements  Runnable {
                      account: null  ]
         }
 
-        def statusDto = new StatusDto()
-        statusDto.customerNumber = customerNumber
+        StatusDto statusDto = new StatusDto()
+        statusDto.accountNumber = customerNumber
         statusDto.data = JsonOutput.toJson(data)
+        statusDto
     }
 
     private UserCreateDto generateUserCreateBodyDto(CsvRow csvRow){
-        new UserCreateDto(csvRow.customerNumber.toString())
+        new UserCreateDto(csvRow.accountNumber.toString())
     }
 
-    private AccountCreateDto generateAccountCreateBodyDto(CsvRow csvRow, UserDto userResponse){
+    private AccountCreateDto generateAccountCreateBodyDto(CsvRow csvRow, UserResponseDto userResponse){
         AccountCreateDto cmd = new AccountCreateDto()
         cmd.with {
             userId = userResponse.id
-            financialEntityId = csvRow.financialEntityId
+            financialEntityId = csvRow.accountFinancialEntityId
             nature = csvRow.accountNature
             name = csvRow.accountName
-            number = csvRow.customerNumber
-            balance = csvRow.balance
+            number = csvRow.accountNumber
+            balance = csvRow.accountBalance
         }
         cmd
     }

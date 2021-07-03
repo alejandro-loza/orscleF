@@ -7,7 +7,7 @@ class ValidatorServiceImpl implements ValidatorService{
 
     @Override
     Boolean areRecordsUniqueValid(List<CsvRow> listCsv) {
-        listCsv == listCsv.toUnique { a, b -> a.customerNumber <=> b.customerNumber }
+        listCsv == listCsv.toUnique { a, b -> a.accountNumber <=> b.accountNumber }
     }
 
     @Override

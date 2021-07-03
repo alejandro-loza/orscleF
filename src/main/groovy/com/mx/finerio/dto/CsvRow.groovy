@@ -1,10 +1,10 @@
 package com.mx.finerio.dto
 
 class CsvRow {
-    String userName
-    Long customerNumber
+    String customerName
+    Long accountFinancialEntityId
     String accountName
+    Long accountNumber
     String accountNature
-    BigDecimal balance
-    Long financialEntityId
+    BigDecimal accountBalance
 }

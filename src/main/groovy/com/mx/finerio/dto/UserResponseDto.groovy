@@ -1,6 +1,6 @@
 package com.mx.finerio.dto
 
-class UserDto extends PfmStatusDto {
+class UserResponseDto extends PfmStatusDto {
    Long id
    String dateCreated
    String name

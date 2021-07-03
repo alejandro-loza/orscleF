@@ -1,9 +1,9 @@
 package com.mx.finerio.services.impl
 
 import com.mx.finerio.dto.AccountCreateDto
-import com.mx.finerio.dto.AccountDto
+import com.mx.finerio.dto.AccountResponseDto
 import com.mx.finerio.dto.UserCreateDto
-import com.mx.finerio.dto.UserDto
+import com.mx.finerio.dto.UserResponseDto
 import com.mx.finerio.services.PFMService
 import groovy.json.JsonSlurper
 import wslite.rest.RESTClient
@@ -53,12 +53,12 @@ class PFMServiceImpl implements  PFMService{
     }
 
     @Override
-    UserDto createUser(UserCreateDto userCreateDto) {
+    UserResponseDto createUser(UserCreateDto userCreateDto) {
 
         def data =  [ 'name': userCreateDto.name ]
         def client = new RESTClient( host )
         def response
-        def userDto = new UserDto()
+        def userDto = new UserResponseDto()
         def bodyResponse
         try{
 
@@ -86,7 +86,7 @@ class PFMServiceImpl implements  PFMService{
     }
 
     @Override
-    AccountDto createAccount( AccountCreateDto accountCreateDto ) {
+    AccountResponseDto createAccount(AccountCreateDto accountCreateDto ) {
 
         def data =  [  userId: accountCreateDto.userId,
                        financialEntityId: accountCreateDto.financialEntityId,
@@ -97,7 +97,7 @@ class PFMServiceImpl implements  PFMService{
 
         def client = new RESTClient( host )
         def response
-        def accountDto = new AccountDto()
+        def accountDto = new AccountResponseDto()
         def bodyResponse
         try{
 

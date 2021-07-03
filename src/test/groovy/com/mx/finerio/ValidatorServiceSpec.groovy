@@ -11,9 +11,9 @@ class ValidatorServiceSpec extends Specification {
         given:
         CsvRow row = new CsvRow()
         row.with {
-            userName = 'username'
+            customerName = 'username'
             accountNature = 'Debit'
-            customerNumber = 123
+            accountNumber = 123
         }
         List<CsvRow> rows = [row,row]
 
@@ -28,16 +28,16 @@ class ValidatorServiceSpec extends Specification {
         given:
         CsvRow row1 = new CsvRow()
         row1.with {
-            userName = 'username'
+            customerName = 'username'
             accountNature = 'Debit'
-            customerNumber = 123
+            accountNumber = 123
         }
 
         CsvRow row2 = new CsvRow()
         row2.with {
-            userName = 'username'
+            customerName = 'username'
             accountNature = 'Debit'
-            customerNumber = 456
+            accountNumber = 456
         }
         List<CsvRow> rows = [row1,row2]
 

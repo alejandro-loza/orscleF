@@ -47,7 +47,7 @@ class ReadFileServiceSpec extends Specification{
         assert response.size() == 4818
 
         def group = response.groupBy {
-            it.userName
+            it.customerName
         }
 
         assert group.size() == 755
@@ -55,7 +55,7 @@ class ReadFileServiceSpec extends Specification{
         assert group["ABELARDO SANCHEZ ORTA"].size() == 3044
 
         def group2 = response.groupBy {
-            it.customerNumber
+            it.accountNumber
         }
         assert group2.size() == 4818
     }
