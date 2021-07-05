@@ -25,8 +25,13 @@ class Orchestrator {
         ArgumentsDto arguments = buildArguments(args)
         List<CsvRow> listCsv = readFileService.processInputFile( arguments.filePath )
 
-        if ( !validatorService.areRecordsUniqueValid( listCsv )) {//todo verify if throws or continue to migrating
-            println "Records are invalid"
+        if ( !validatorService.areRecordsUniqueValid( listCsv )) {
+            println "Records are not unique"
+            return
+        }
+
+        if ( !validatorService.areNumberRecordsSupported( listCsv )) {
+            println "Records are more than 10000"
             return
         }
         def resultFilePath = PfmTask.getFileName(arguments.filePath)
@@ -36,7 +41,12 @@ class Orchestrator {
     }
 
     private static ArgumentsDto buildArguments(String[] args) {
-        ArgumentsDto arguments = new ArgumentsDto()//todo validate command args
+        ArgumentsDto arguments = new ArgumentsDto()
+
+        if (args.size() < 5) {
+            throw new RuntimeException("Please introduce all the arguments")
+        }
+
         if (args.size() > 0) {
             arguments.with {
                 filePath = args[0]

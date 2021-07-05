@@ -11,6 +11,12 @@ class ValidatorServiceImpl implements ValidatorService{
     }
 
     @Override
+    Boolean areNumberRecordsSupported(List<CsvRow> listCsv) {
+        listCsv.size() <= 10000
+    }
+
+
+    @Override
     Boolean hasBeenProcessed(CsvRow csvRow) {
         return null
     }
