@@ -16,7 +16,7 @@ class FileServiceSpec extends Specification {
         println "DELETED" + fileSuccessfullyDeleted
     }*/
 
-    def "Should save a customer file response"() {
+   /* def "Should save a customer file response"() {
         given:
         StatusDto statusDto = new StatusDto()
         statusDto.with {
@@ -101,6 +101,6 @@ class FileServiceSpec extends Specification {
         }
         row
     }
-
+*/
 
 }

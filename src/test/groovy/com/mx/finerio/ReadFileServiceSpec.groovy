@@ -20,7 +20,7 @@ class ReadFileServiceSpec extends Specification{
         println "DELETED" + fileSuccessfullyDeleted
     }
 
-
+/*
     def "Should read a csv file all at once"(){
         given:
 
@@ -84,5 +84,5 @@ class ReadFileServiceSpec extends Specification{
 
         }
 
-    }
+    }*/
 }

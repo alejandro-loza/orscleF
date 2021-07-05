@@ -41,6 +41,7 @@ class PFMServiceImpl implements  PFMService{
             }
 
         }catch( wslite.rest.RESTClientException e ){
+            e.printStackTrace()
             throw new Exception(
                     'PFMServiceImpl.getAccessToken.error.onCall')
         }
@@ -52,13 +53,26 @@ class PFMServiceImpl implements  PFMService{
         this.token
     }
 
+    def getRandomNumber(){
+        Math.abs(new Random().nextInt() % 6000) + 1
+    }
+
     @Override
     UserResponseDto createUser(UserCreateDto userCreateDto) {
 
         def data =  [ 'name': userCreateDto.name ]
+        def userDto = new UserResponseDto()
+        //start mock
+        /*userDto.isSucces = true
+        userDto.id = getRandomNumber()
+        userDto.dateCreated = new Date().toString()
+        userDto.name = bodyResponse['name']
+        return userDto*/
+        //End mock
+
         def client = new RESTClient( host )
         def response
-        def userDto = new UserResponseDto()
+
         def bodyResponse
         try{
 
@@ -73,7 +87,7 @@ class PFMServiceImpl implements  PFMService{
                 userDto.isSucces = false
                 userDto.statusCode = e.response.statusCode
                 userDto.errorMessage = bodyResponse['description']
-                userDto.errorDetail = bodyResponse['detail']
+                userDto.errorDetail = bodyResponse['detail']o
             return userDto
         }
 

@@ -12,8 +12,6 @@ import groovy.json.JsonOutput
 
 class PfmTask implements  Runnable {
 
-    public static final String FILES_PATH = "files"
-
     PFMService pfmService
     FileService fileService
     CsvRow csvRow
@@ -31,55 +29,67 @@ class PfmTask implements  Runnable {
         this.seedFileName = data.seedFileName
     }
 
+    static String getFileName( String seedFileName){
+        def file=new File(seedFileName)
+        def name=file.name.split("\\.")[0]
+        name
+    }
+
     @Override
     void run() {
         UserResponseDto userCreateResponse = pfmService.createUser(generateUserCreateBodyDto(csvRow))
-        AccountResponseDto accountCreateResponse = pfmService.createAccount(
-                generateAccountCreateBodyDto(csvRow, userCreateResponse))
+        AccountResponseDto accountCreateResponse
+
+        if( userCreateResponse.isSucces) {
+            accountCreateResponse = pfmService.createAccount(
+                    generateAccountCreateBodyDto(csvRow, userCreateResponse))
+        }
+
         StatusDto statusDto = fromPfmResponseToFileRecord(
                 userCreateResponse,accountCreateResponse, csvRow.accountNumber.toString())
-        fileService.createFileRecord(statusDto, FILES_PATH)
+        println "statusDto: $statusDto"
+       fileService.createFileRecord(statusDto, getFileName(seedFileName))
     }
 
-    private StatusDto fromPfmResponseToFileRecord( UserResponseDto userDto, AccountResponseDto accountDto, String customerNumber ){
+    private StatusDto fromPfmResponseToFileRecord( UserResponseDto userResponseDto, AccountResponseDto accountResponseDto, String customerNumber ){
 
         def user
         def account
         def resMap
 
-        if( userDto.isSucces ) { //todo if account fails why not all row fails? if( userDto.isSucces && accountDto.isSucces )
+        if( userResponseDto.isSucces ) { //todo if account fails why not all row fails? if( userDto.isSucces && accountDto.isSucces )
             user = [ success:true,
-                     id:userDto.id,
-                     dateCreated:userDto.dateCreated,
-                     name:userDto.name ]
-            if( accountDto.isSucces ) {
+                     id:userResponseDto.id,
+                     dateCreated:userResponseDto.dateCreated,
+                     name:userResponseDto.name ]
+            if(  accountResponseDto.isSucces ) {
                 account = [ success: true,
-                            id: accountDto.id,
-                            dateCreated: accountDto.dateCreated,
-                            lastUpdate:accountDto.lastUpdated,
-                            nature: accountDto.nature,
-                            name: accountDto.number,
-                            balance:accountDto.balance,
-                            chargeable: accountDto.chargeable]
+                            id: accountResponseDto.id,
+                            dateCreated: accountResponseDto.dateCreated,
+                            lastUpdate:accountResponseDto.lastUpdated,
+                            nature: accountResponseDto.nature,
+                            name: accountResponseDto.number,
+                            balance:accountResponseDto.balance,
+                            chargeable: accountResponseDto.chargeable]
                 resMap = [ success: true, user: user, account: account ] //todo migrate to DTOS to use on resumen csv
             }else{
                 def accountError = [ success: false,
-                                     statusCode: accountDto.statusCode,
-                                     errorMessage:accountDto.errorMessage ,
-                                     errorDetail: accountDto.errorDetail  ]
+                                     statusCode: accountResponseDto.statusCode,
+                                     errorMessage:accountResponseDto.errorMessage ,
+                                     errorDetail: accountResponseDto.errorDetail  ]
                 resMap = [ success: false, user: user, account: accountError  ]
             }
         }else{
                 resMap = [ success: false, user: [ success: false,
-                                             statusCode: userDto.statusCode,
-                                             errorMessage:userDto.errorMessage ,
-                                             errorDetail: userDto.errorDetail  ],
+                                             statusCode: userResponseDto.statusCode,
+                                             errorMessage:userResponseDto.errorMessage ,
+                                             errorDetail: userResponseDto.errorDetail  ],
                      account: null  ]
         }
 
         StatusDto statusDto = new StatusDto()
         statusDto.accountNumber = customerNumber
-        statusDto.data = JsonOutput.toJson(data)
+        statusDto.data = JsonOutput.toJson(resMap)
         statusDto
     }
 
@@ -90,13 +100,17 @@ class PfmTask implements  Runnable {
     private AccountCreateDto generateAccountCreateBodyDto(CsvRow csvRow, UserResponseDto userResponse){
         AccountCreateDto cmd = new AccountCreateDto()
         cmd.with {
-            userId = userResponse.id
+            userId = userResponse.id as Long
             financialEntityId = csvRow.accountFinancialEntityId
-            nature = csvRow.accountNature
+            nature = getCapitalString (csvRow.accountNature)
             name = csvRow.accountName
             number = csvRow.accountNumber
             balance = csvRow.accountBalance
         }
         cmd
+    }
+
+    private String getCapitalString(String nature){
+        nature.substring(0,1)+nature.substring(1,nature.length()).toLowerCase()
     }
 }

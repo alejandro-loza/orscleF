@@ -25,9 +25,19 @@ class FileServiceImpl implements  FileService {
         File successMigratedFile = new File( "${resumeDirectory.path}/successMigrated.csv")
         File failMigratedFile = new File( "${resumeDirectory.path}/failMigrated.csv")
 
+        if(successMigratedFile.exists()){successMigratedFile.delete()}
+        if(failMigratedFile.exists()){failMigratedFile.delete()}
+
         cvsRows.each {cvsRow ->
             generateRowResumen(resultPath, cvsRow, failMigratedFile, successMigratedFile)
         }
+    }
+
+
+    @Override
+    boolean existFile(String resultPath, String accountNumber ){
+        File file = new File("${resultPath}/responses/${accountNumber}.txt")
+        file.exists()
     }
 
     private void generateRowResumen(String resultPath, CsvRow cvsRow, File failMigrated, File successMigrated) {
@@ -37,15 +47,13 @@ class FileServiceImpl implements  FileService {
             if (fileContent && !fileContent.isEmpty()) {
                 ResumeCsvRow resumeCsvRow = new ResumeCsvRow(cvsRow)
                 if (fileContent.success) {
-                    resumeCsvRow.finerioCustomerId = fileContent.user.id
-                    if (!fileContent?.account?.success) {
-                        createRowOnFile(resumeCsvRow, failMigrated)//todo what happen with user ok and account bad?
-                    }
-                    resumeCsvRow.finerioAccountId = fileContent?.account?.id
-                    createRowOnFile(resumeCsvRow, successMigrated)
+                       // createRowOnFile(resumeCsvRow, failMigrated)//todo what happen with user ok and account bad?
+                        resumeCsvRow.finerioCustomerId = fileContent.user.id as Long
+                        resumeCsvRow.finerioAccountId = fileContent?.account?.id as Long
+                        createRowOnFile(resumeCsvRow, successMigrated)
 
                 } else {
-                    createRowOnFile(resumeCsvRow, failMigrated)
+                    createRowOnFailedFile(resumeCsvRow, failMigrated)
                 }
 
             } else {
@@ -54,15 +62,26 @@ class FileServiceImpl implements  FileService {
         }
     }
 
-    private void createRowOnFile(ResumeCsvRow resumeCsvRow, File failMigrated) {
+    private void createRowOnFailedFile(ResumeCsvRow resumeCsvRow, File failMigrated) {
         def row = [
                 resumeCsvRow.customerName,
                 resumeCsvRow.accountFinancialEntityId,
                 resumeCsvRow.accountName,
+                resumeCsvRow.accountNumber,
                 resumeCsvRow.accountNature,
                 resumeCsvRow.accountBalance,
+        ]
+        failMigrated.append row.join(',')
+        failMigrated.append '\n'
+    }
+
+    private void createRowOnFile(ResumeCsvRow resumeCsvRow, File failMigrated) {
+        def row = [
+                resumeCsvRow.customerName,
                 resumeCsvRow.finerioCustomerId,
-                resumeCsvRow.finerioAccountId
+                resumeCsvRow.accountName,
+                resumeCsvRow.finerioAccountId,
+                resumeCsvRow.accountNumber,
         ]
         failMigrated.append row.join(',')
         failMigrated.append '\n'

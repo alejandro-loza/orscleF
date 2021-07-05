@@ -24,19 +24,22 @@ class Orchestrator {
     void run(String[] args) {
         ArgumentsDto arguments = buildArguments(args)
         List<CsvRow> listCsv = readFileService.processInputFile( arguments.filePath )
+
         if ( !validatorService.areRecordsUniqueValid( listCsv )) {//todo verify if throws or continue to migrating
+            println "Records are invalid"
             return
         }
-        migrateRowsToPfmApi(arguments, listCsv)
-        fileService.createResume(listCsv, arguments.filePath )
-        println "Migration finished for file: $arguments.filePath "
+        def resultFilePath = PfmTask.getFileName(arguments.filePath)
+        migrateRowsToPfmApi(arguments, listCsv, resultFilePath)
+        fileService.createResume(listCsv, resultFilePath )
+        println "Migration finished for file: $resultFilePath"
     }
 
     private static ArgumentsDto buildArguments(String[] args) {
         ArgumentsDto arguments = new ArgumentsDto()//todo validate command args
         if (args.size() > 0) {
             arguments.with {
-                filePath = args.first()
+                filePath = args[0]
                 host = args[ 1 ]
                 incomeToken = args[ 2 ]
                 threads = args[ 3 ]
@@ -46,19 +49,24 @@ class Orchestrator {
         arguments
     }
 
-    private void migrateRowsToPfmApi(ArgumentsDto arguments, List<CsvRow> listCsv) {
+    private void migrateRowsToPfmApi(ArgumentsDto arguments, List<CsvRow> listCsv, String resultFilePath) {
         ThreadPoolExecutor executor =
                 (ThreadPoolExecutor) Executors.newFixedThreadPool(arguments.threads as Integer)
 
         listCsv.each {//todo check for an optimal loop and start point!!
-            def data = [pfmService  :  new PFMServiceImpl(arguments.host, arguments.incomeToken),
-                        fileService : fileService,
-                        csvRow      : it,
-                        host        : arguments.host,
-                        incomeToken : arguments.incomeToken,
-                        seedFileName: arguments.filePath
-            ]
-            executor.execute( new PfmTask(data))
+            if( !fileService.existFile(resultFilePath, it.accountNumber as String) ){
+                println "Processing record with accountNmber $it.accountNumber"
+                def data = [pfmService  :  new PFMServiceImpl(arguments.host, arguments.incomeToken),
+                            fileService : fileService,
+                            csvRow      : it,
+                            host        : arguments.host,
+                            incomeToken : arguments.incomeToken,
+                            seedFileName: arguments.filePath
+                ]
+                executor.execute( new PfmTask(data))
+        }else{
+                println "Found accountNumber $it.accountNumber record"
+            }
         }
         executor.shutdown()
         executor.awaitTermination(arguments.awaitTerminationMinutes as Long, TimeUnit.MINUTES)

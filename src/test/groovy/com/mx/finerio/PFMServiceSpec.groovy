@@ -21,7 +21,7 @@ class PFMServiceSpec extends Specification{
 
     }
 
-    def "Should create user"(){
+    /*def "Should create user"(){
         given:
         def userCreateDto = new UserCreateDto()
         def name='145156163'
@@ -98,7 +98,7 @@ class PFMServiceSpec extends Specification{
         then:
         assert response.isSucces == false
         assert response.name == null
-    }
+    }*/
 
 
 
