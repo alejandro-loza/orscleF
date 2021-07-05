@@ -87,7 +87,7 @@ class PFMServiceImpl implements  PFMService{
                 userDto.isSucces = false
                 userDto.statusCode = e.response.statusCode
                 userDto.errorMessage = bodyResponse['description']
-                userDto.errorDetail = bodyResponse['detail']o
+                userDto.errorDetail = bodyResponse['detail']
             return userDto
         }
 

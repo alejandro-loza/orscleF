@@ -14,10 +14,11 @@ plugins {
     id 'java-library'
     id 'groovy'
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
-group 'dinnMigration'
-version '0.0.1-SNAPSHOT'
+group 'dinn-migration'
+version '0.0.1'
 
 
 
